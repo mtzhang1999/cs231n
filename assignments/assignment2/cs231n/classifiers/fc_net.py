@@ -74,7 +74,18 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        layer_dims = [input_dim] + hidden_dims + [num_classes]
+
+        for i in range(self.num_layers):
+          self.params['W' + str(i + 1)] = np.random.normal(0.0, weight_scale, size=(layer_dims[i], layer_dims[i + 1]))
+          self.params['b' + str(i + 1)] = np.zeros(layer_dims[i + 1])
+
+          if self.normalization != None:
+            self.params['gamma' + str(i + 1)] = np.ones(layer_dims[i + 1])
+            self.params['beta' + str(i + 1)] = np.zeros(layer_dims[i + 1])
+
+
+        # pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -148,7 +159,29 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # {affine - [batch/layer norm] - relu - [dropout]} x (L - 1) - affine - softmax
+        self.cache = {}
+
+        for i in range(self.num_layers):
+          out, cache = affine_forward(X, self.params['W' + str(i + 1)], self.params['b' + str(i + 1)])
+          
+          if self.normalization == 'batchnorm':
+            out, cache = batchnorm_forward(X, self.params['gamma' + str(i + 1)], self.params['beta' + str(i + 1)], self.bn_params[i])
+          elif self.normalization == 'layernorm':
+            out, cache = layernorm_forward(X, self.params['gamma' + str(i + 1)], self.params['beta' + str(i + 1)], self.bn_params[i])
+          
+          out = relu_forward(out)
+
+          if self.use_dropout:
+            out, cache_dropout = drop_forward(out, self.dropout_param)
+
+          self.cache['no_dropout_cache' + str(i + 1)] = cache
+          if self.use_dropout:
+            self.cache['drop_out_cache' + str(i + 1)] = cache_dropout
+
+        out, cache[self.num_layers] = affine_forward(out, self.params['W' + str(self.num_layers)], self.params['b' + str(self.num_layers)])
+
+        # pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -175,7 +208,9 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+
+
+        # pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
