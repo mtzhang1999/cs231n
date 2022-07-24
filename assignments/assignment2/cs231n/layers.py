@@ -119,6 +119,40 @@ def relu_backward(dout, cache):
     ###########################################################################
     return dx
 
+def softmax_loss(x, y):
+    """
+    Computes the loss and gradient for softmax classification.
+    Inputs:
+    - x: Input data, of shape (N, C) where x[i, j] is the score for the jth
+      class for the ith input.
+    - y: Vector of labels, of shape (N,) where y[i] is the label for x[i] and
+      0 <= y[i] < C
+    Returns a tuple of:
+    - loss: Scalar giving the loss
+    - dx: Gradient of the loss with respect to x
+    """
+    loss, dx = None, None
+
+    ###########################################################################
+    # TODO: Copy over your solution from A1.
+    ###########################################################################
+    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+
+    correct_class_score = x - np.max(x, axis=1).reshape(-1, 1) # shape: (N, 1)
+    softmax_i = np.exp(correct_class_score) / np.sum(np.exp(correct_class_score), axis=1).reshape(-1, 1)
+    loss = -np.sum(np.log(softmax_i[range(x.shape[0]), y])) / x.shape[0]
+
+    dx = softmax_i.copy()
+    dx[range(x.shape[0]), y] -= 1
+    dx /= x.shape[0]
+
+    # pass
+
+    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    ###########################################################################
+    #                             END OF YOUR CODE                            #
+    ###########################################################################
+    return loss, dx
 
 def batchnorm_forward(x, gamma, beta, bn_param):
     """
@@ -773,71 +807,3 @@ def spatial_groupnorm_backward(dout, cache):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return dx, dgamma, dbeta
-
-
-def svm_loss(x, y):
-    """
-    Computes the loss and gradient using for multiclass SVM classification.
-    Inputs:
-    - x: Input data, of shape (N, C) where x[i, j] is the score for the jth
-      class for the ith input.
-    - y: Vector of labels, of shape (N,) where y[i] is the label for x[i] and
-      0 <= y[i] < C
-    Returns a tuple of:
-    - loss: Scalar giving the loss
-    - dx: Gradient of the loss with respect to x
-    """
-    loss, dx = None, None
-
-    ###########################################################################
-    # TODO: Copy over your solution from A1.
-    ###########################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    # referring to https://github.com/qxdn/cs231n-assignment
-    correct_class_score = x[range(x.shape[0]), list(y)].reshape(-1, 1)
-    margins = np.maximum(0, x - correct_class_score + 1)
-    margins[range(x.shape[0]), list(y)] = 0
-    loss = np.sum(margins) / x.shape[0]
-
-    num_pos = np.sum(margins > 0,axis=1)
-    # 梯度就是x
-    dx = np.zeros(x.shape)
-    dx[margins > 0] = 1
-    # j th个地方还要额外减去一个x
-    dx[np.arange(x.shape[0]), y] -= num_pos
-    dx /= x.shape[0]
-    # pass
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
-    return loss, dx
-
-
-def softmax_loss(x, y):
-    """
-    Computes the loss and gradient for softmax classification.
-    Inputs:
-    - x: Input data, of shape (N, C) where x[i, j] is the score for the jth
-      class for the ith input.
-    - y: Vector of labels, of shape (N,) where y[i] is the label for x[i] and
-      0 <= y[i] < C
-    Returns a tuple of:
-    - loss: Scalar giving the loss
-    - dx: Gradient of the loss with respect to x
-    """
-    loss, dx = None, None
-
-    ###########################################################################
-    # TODO: Copy over your solution from A1.
-    ###########################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
-    return loss, dx
